@@ -3,14 +3,19 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+const MASTER_LOCALITIES = ["S G Highway", "Dholera", "Satellite", "Bopal", "Jagatpur", "Chandkheda", "Gota", "Prahlad Nagar", "Vastrapur", "Vaishno Devi", "Shela", "South Bopal", "Naranpura", "Bavla", "Bodakdev", "Maninagar", "Thaltej", "Pipali Highway", "Naroda", "Vejalpur", "Noblenagar", "Ghatlodia", "Ambawadi", "Motera", "Memnagar", "Ranip", "Vastral", "Navrangpura", "Gurukul", "Nikol", "S P Ring Road", "Shilaj", "Vasna", "Chandlodia", "Paldi", "Science City", "Sabarmati", "Ghodasar", "Juhapura", "New Ranip", "Narol", "Jivrajpark", "Bapunagar", "Tragad", "Nava Wadaj", "Shyamal", "Gokuldham", "Sanand", "Vatva", "Ashram road", "Dholka", "Sola", "Ghuma", "Jodhpur", "New CG Road", "Isanpur", "Shahibaug", "Thaltej Road", "Changodar", "Kankaria", "New Maninagar", "Saraspur", "Makarba", "Amraiwadi", "Odhav", "Palodia", "Sanand - Nalsarovar Road", "Nehrunagar", "Ramdev Nagar", "Sarkhej", "Ambli", "Kathwada", "Nirnay Nagar", "C G Road", "Sanathal", "Sughad", "Hathijan", "Manipur", "Chanakyapuri", "Shah E Alam Roja", "Nava Naroda", "Khokhra", "Saijpur Bogha", "Godhavi", "Mahadev Nagar", "Ellis Bridge", "Racharda", "Rakanpur", "Nasmed", "Jashoda Nagar", "Lambha", "Koteshwar", "Bagodara", "Lapkaman", "Anandnagar", "Kubernagar", "Sola Road", "Ognaj", "Bhadaj", "Shantipura", "Hansol", "Naroda road", "Narol Road", "Moraiya", "Behrampura", "Hatkeshwar", "Kalupur", "Meghani Nagar", "Barejadi", "kheda", "Khodiar Nagar", "Bhat", "Asarwa", "Chharodi", "Dhandhuka", "Khanpur", "Naroda GIDC", "Raipur", "Shahpur", "Thakkarbapa Nagar", "Usmanpura", "132 Feet Ring Road", "Sanand-Viramgam Road", "Ahmedabad-Rajkot-Highway", "Aslali", "Ayojan Nagar", "Bhadra", "Dani Limbada", "Dariapur", "Dudheshwar", "Girdhar Nagar", "Gomtipur", "Gulbai Tekra", "Jamalpur", "Juna Wadaj", "Kalapinagar", "Keshav Nagar", "Khadia", "Khamasa", "Madhupura", "Navjivan", "Raikhad", "Rakhial", "Sadar Bazar", "Vatva GIDC", "Viramgam", "Kali", "Santej", "Nandej", "Raska", "Laxmanpura", "Bavla Nalsarovar Road", "Unali", "Mandal", "D Colony", "Sardar Colony", "Kotarpur", "Mirzapur", "Narayan Nagar", "Kolat", "Purshottam Nagar", "Gita Mandir", "Sachana", "Vinzol", "Geratpur", "Sarangpur", "Acher", "Hebatpur", "Devdholera", "Lilapur", "Mahemdabad", "Vishala", "Ashok Vatika"];
+
+const POPULAR_LOCALITIES = ["Vastrapur", "Prahlad Nagar", "Satellite", "Vastral", "Bopal", "Maninagar", "Amraiwadi", "C G Road", "Thaltej", "Navrangpura", "Gota", "Bodakdev"];
+
 const FOOD_SYNONYMS: Record<string, string> = {
   golgappa: "panipuri",
   puchka: "panipuri",
   gupchup: "panipuri",
-  "bun maska": "maskabun",
+  bunmaska: "maskabun",
   muskabun: "maskabun",
   "lemon soda": "gotisoda",
-  "aloo bonda": "betatavada",
+  "aloo bonda": "batatavada",
+  gota: "Bhajiya"
 };
 
 type Vendor = {
@@ -227,6 +232,7 @@ export default function Home() {
     addName.trim().length > 0 &&
     addAddress.trim().length > 0 &&
     addLocality.trim().length > 0 &&
+    MASTER_LOCALITIES.some((loc) => loc.toLowerCase() === addLocality.trim().toLowerCase()) &&
     addSpeciality.trim().length > 0;
 
   async function handleSearch(e: React.FormEvent) {
@@ -423,11 +429,11 @@ export default function Home() {
         prev.map((v) =>
           v.id === vendorId
             ? {
-                ...v,
-                score: data.score ?? v.score,
-                rating_average: data.rating_average ?? v.rating_average,
-                rating_count: data.rating_count ?? v.rating_count,
-              }
+              ...v,
+              score: data.score ?? v.score,
+              rating_average: data.rating_average ?? v.rating_average,
+              rating_count: data.rating_count ?? v.rating_count,
+            }
             : v
         )
       );
@@ -504,9 +510,8 @@ export default function Home() {
           <div className="mb-4 flex items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
               {keyword
-                ? `Results for "${keyword}"${
-                    locality ? ` in ${locality}` : ""
-                  }`
+                ? `Results for "${keyword}"${locality ? ` in ${locality}` : ""
+                }`
                 : locality
                   ? `Top Rated in ${locality}`
                   : "Top vendors"}
@@ -607,14 +612,12 @@ export default function Home() {
                             key={star}
                             type="button"
                             onClick={() => handleSelectRating(vendor.id, star)}
-                            className={`h-8 w-8 rounded-full text-base ${
-                              selected
-                                ? "bg-amber-100 text-amber-500 dark:bg-amber-500/20 dark:text-amber-300"
-                                : "bg-slate-100 text-slate-400 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:hover:bg-slate-700"
-                            }`}
-                            aria-label={`Rate ${star} star${
-                              star > 1 ? "s" : ""
-                            }`}
+                            className={`h-8 w-8 rounded-full text-base ${selected
+                              ? "bg-amber-100 text-amber-500 dark:bg-amber-500/20 dark:text-amber-300"
+                              : "bg-slate-100 text-slate-400 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:hover:bg-slate-700"
+                              }`}
+                            aria-label={`Rate ${star} star${star > 1 ? "s" : ""
+                              }`}
                           >
                             ★
                           </button>
@@ -698,7 +701,7 @@ export default function Home() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-200">
-                    Locality
+                    Locality <span className="text-emerald-400 font-normal ml-1">(Ahmedabad Only)</span>
                   </label>
                   <input
                     type="text"
@@ -707,6 +710,9 @@ export default function Home() {
                     className="mt-1 block w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                     placeholder="e.g. Amraiwadi"
                   />
+                  <p className="mt-1.5 text-xs text-slate-400">
+                    We are currently mapping street food in Ahmedabad only.
+                  </p>
                 </div>
 
                 {addMessage && (
